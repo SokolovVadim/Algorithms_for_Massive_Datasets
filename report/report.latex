@@ -148,6 +148,21 @@ Item-item CF & 0.422 & 0.375 \\
 
 The collaborative filtering method significantly improves prediction accuracy compared to the baseline.
 
+\subsection{Top-$K$ Recommendation Quality}
+
+To evaluate recommendation quality as a ranking problem, we compute Top-$10$ recommendations per user and measure HitRate@10, Precision@10, Recall@10 and NDCG@10 on held-out test items. Users with at least 3 training items and at least 1 test item are considered. Results are averaged over 1,935 users (a cap of 2,000 users was used for efficiency).
+
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Method & HitRatex10 & Precisionx10 & Recallx10 & NDCGx10 \\
+\midrule
+Popularity baseline & 0.0440 & 0.0048 & 0.0219 & 0.0117 \\
+Item-item CF & 0.3654 & 0.0447 & 0.2494 & 0.1464 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
 \section{Example Recommendations}
 
 For active users, the system recommends books consistent with their preferences, for example classic literature readers receive recommendations for similar classic works.
