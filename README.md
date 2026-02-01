@@ -215,8 +215,6 @@ Predicted test points: 6475 / 17280
 
 So, the coverage is 37%, went up from 16%, good
 
-Check one user
-
 
 ```
 Top rated by user:
@@ -231,3 +229,26 @@ Top rated by user:
 5.0  0140860428  -  Jane Eyre (Penguin Classics)
 5.0  0140860436  -  The Age of Innocence (Classic, 20th-Century, Audio)
 ```
+
+Mean centering
+
+```
+5.000 (from 2 neigh)  1593357087  -  Northern Lights
+5.000 (from 2 neigh)  078625033X  -  Light in Shadow: A Whispering Springs Novel
+5.000 (from 2 neigh)  0195810147  -  Journey to the Centre of the Earth (Oxford University English Readers)
+5.000 (from 2 neigh)  B000JWW2G4  -  The Invisible Man
+4.530 (from 2 neigh)  B0002ST9SY  -  Deception Point
+4.504 (from 2 neigh)  B000GLI9HY  -  Shutter Island
+4.500 (from 2 neigh)  B000I3NFKG  -  THE CATCHER IN THE RYE
+```
+
+
+
+what we seeing is a a real property of the dataset and a predictor :
+
+* Many users (and many book editions) have  many 5 star tatings , so the weighted-average predictor will often output exactly 5.0 .
+* Mean-centering helps when users have different “generosity”, but if a user’s ratings are still mostly 5, the centered deviations are 0, so we still land near the user mean (=5).
+* For our second user we see non-5 predictions (4.53, 4.50, …), which means the centered model is working.
+
+
+If only a few neighbor contributions exist, pull the prediction toward the user mean
