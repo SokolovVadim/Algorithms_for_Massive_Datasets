@@ -1,0 +1,11 @@
+jupyterlab
+notebook
+ipykernel
+pandas
+numpy
+matplotlib
+scikit-learn
+tqdm
+pyarrow
+kaggle
+pyspark==3.5.1
