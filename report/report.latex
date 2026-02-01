@@ -95,6 +95,28 @@ Key parameters:
 
 All processing steps are executed using Spark RDD transformations and aggregations.
 
+\subsection{Relation to MapReduce Processing}
+
+Although the implementation uses Apache Spark, the core computations follow the MapReduce processing model studied in the course.
+
+The recommendation algorithm is implemented using distributed transformations that correspond to Map and Reduce operations:
+
+\begin{itemize}
+\item \textbf{User aggregation:} ratings are mapped to $(user, (item, rating))$ pairs and grouped by user, corresponding to a Map followed by a Reduce-by-key operation.
+
+\item \textbf{Item pair generation:} for each user, all combinations of rated items are generated using a flatMap transformation, producing intermediate key-value pairs representing item pairs.
+
+\item \textbf{Pair statistics aggregation:} statistics required for cosine similarity are aggregated using reduceByKey, which corresponds to a distributed Reduce phase.
+
+\item \textbf{Similarity computation:} aggregated statistics are mapped to cosine similarity values for each item pair.
+
+\item \textbf{Neighborhood construction:} item similarities are regrouped by item and only the top-$K$ neighbors are kept, again using distributed grouping and reduction.
+
+\item \textbf{Prediction and evaluation:} predicted ratings and evaluation metrics such as RMSE are computed via distributed map and aggregation operations.
+\end{itemize}
+
+Therefore, while Spark abstracts execution details, the implemented pipeline follows the MapReduce paradigm throughout the similarity computation and recommendation stages.
+
 \section{Evaluation}
 
 We split the dataset randomly:
