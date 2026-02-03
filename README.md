@@ -19,7 +19,6 @@ RMSE: 0.3056909533599352
 Coverage: 0.10454545454545454
 Predicted test points: 529 / 5060
 
-
 So we predicted only small part. And we need to fix it.
 
 Set MIN_COMMON_USERS = 2:
@@ -212,9 +211,7 @@ Coverage: 0.37471064814814814
 
 Predicted test points: 6475 / 17280
 
-
 So, the coverage is 37%, went up from 16%, good
-
 
 ```
 Top rated by user:
@@ -242,13 +239,44 @@ Mean centering
 4.500 (from 2 neigh)  B000I3NFKG  -  THE CATCHER IN THE RYE
 ```
 
-
-
 what we seeing is a a real property of the dataset and a predictor :
 
 * Many users (and many book editions) have  many 5 star tatings , so the weighted-average predictor will often output exactly 5.0 .
 * Mean-centering helps when users have different “generosity”, but if a user’s ratings are still mostly 5, the centered deviations are 0, so we still land near the user mean (=5).
 * For our second user we see non-5 predictions (4.53, 4.50, …), which means the centered model is working.
 
-
 If only a few neighbor contributions exist, pull the prediction toward the user mean
+
+
+## Significance weighting
+
+
+### Before significance weighting
+
+* RMSE ≈ **0.421**
+* Coverage ≈ **0.375**
+* HitRate@10 ≈ **0.365**
+* Recall@10 ≈ **0.249**
+* NDCG@10 ≈ **0.146**
+
+### After improvements
+
+* RMSE = **0.410**
+* Coverage = **0.388**
+* HitRate@10 = **0.405**
+* Recall@10 = **0.279**
+* NDCG@10 = **0.167**
+
+### Popularity baseline
+
+* HitRate@10 ≈ **0.044**
+* NDCG@10 ≈ **0.013**
+
+sim'=0.703 (shrink=0.714, common=25)
+
+
+Meaning:
+
+* similarity computed,
+* reliability weighting applied,
+* explanation trace available.

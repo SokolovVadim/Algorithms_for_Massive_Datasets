@@ -178,6 +178,55 @@ Coverage is limited by sparsity, since many books share few common reviewers.
 Also item canonicalization by title was tested; however, naive canonicalization may split/merge items incorrectly and reduces overlap, decreasing coverage.
 To avoid recommending multiple editions of the same book, we post-process the Top-N list by grouping items via a normalized title key and keeping only one representative per group.
 
+\subsection{Model Improvements}
+
+After implementing the baseline item-based collaborative filtering recommender, several improvements were introduced to enhance prediction quality and recommendation ranking.
+
+\paragraph{Significance-weighted similarities.}
+Cosine similarity between items may become unreliable when computed from only a few common users. To mitigate this effect, a significance weighting factor was introduced:
+
+\[
+sim'(i,j) = sim(i,j) \cdot \frac{n_{ij}}{n_{ij} + \beta},
+\]
+
+where $n_{ij}$ is the number of users who rated both items and $\beta$ is a smoothing parameter. This reduces the influence of item pairs supported by few users while preserving strong similarities backed by sufficient data.
+
+\paragraph{Mean-centered predictions.}
+User rating behavior often differs in scale. Therefore, predictions are computed using mean-centered ratings:
+
+\[
+\hat r_{u,i} = \mu_u +
+\frac{\sum_{j \in I_u} sim'(i,j)\,(r_{u,j}-\mu_u)}
+     {\sum_{j \in I_u} |sim'(i,j)|},
+\]
+
+where $\mu_u$ is the mean rating of user $u$. This correction improves personalization and reduces bias caused by overly generous or strict raters.
+
+\paragraph{Recommendation evaluation metrics.}
+Beyond prediction RMSE, ranking quality was evaluated using Top-$N$ recommendation metrics:
+
+\begin{itemize}
+\item HitRate@10
+\item Precision@10
+\item Recall@10
+\item NDCG@10
+\end{itemize}
+
+These metrics measure how effectively the recommender retrieves items that users actually liked.
+
+\paragraph{Results improvement.}
+The improvements produced measurable gains over both the minimum version and a popularity-based baseline:
+
+\begin{itemize}
+\item RMSE improved from approximately 0.42 to 0.41.
+\item Prediction coverage increased from about 37\% to nearly 39\%.
+\item HitRate@10 improved to over 40\%.
+\item Ranking metrics significantly outperformed the popularity baseline.
+\end{itemize}
+
+These results confirm that similarity regularization and mean-centered predictions enhance both accuracy and recommendation usefulness.
+
+
 Future improvements could include:
 
 \begin{itemize}
@@ -189,6 +238,17 @@ Future improvements could include:
 
 \section{Conclusion}
 
-We successfully implemented a distributed recommendation system using item-based collaborative filtering. The system scales to large datasets using Spark and produces meaningful recommendations while improving over baseline prediction methods.
+In this project, a recommender system for books was implemented from scratch using distributed data processing techniques. The system relies on an item-based collaborative filtering approach, where item similarities are computed using cosine similarity over user ratings.
+
+The implementation follows a distributed MapReduce-style pipeline using Apache Spark, allowing the processing of large-scale rating data. Several improvements were introduced beyond a basic recommender, including similarity significance weighting, mean-centered predictions, duplicate title handling, and ranking-based evaluation metrics.
+
+Experimental results show that the proposed system significantly outperforms a simple popularity-based baseline, both in prediction accuracy and ranking quality. In particular, improvements in RMSE, recommendation coverage, and Top-$N$ ranking metrics demonstrate the effectiveness of similarity regularization and user-centered predictions.
+
+The project illustrates how classical recommendation algorithms can be efficiently implemented in distributed environments and highlights the importance of proper evaluation when dealing with large-scale datasets.
+
+Future improvements could include hybrid models combining collaborative and content-based methods, as well as more advanced matrix factorization or embedding techniques.
+
+Overall, the project successfully demonstrates practical application of algorithms and technologies studied in the course for solving real-world large-scale data processing problems.
+
 
 \end{document}
