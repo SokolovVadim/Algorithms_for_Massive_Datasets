@@ -175,6 +175,9 @@ The dataset is strongly skewed toward 5-star ratings, making rating prediction l
 
 Coverage is limited by sparsity, since many books share few common reviewers.
 
+Also item canonicalization by title was tested; however, naive canonicalization may split/merge items incorrectly and reduces overlap, decreasing coverage.
+To avoid recommending multiple editions of the same book, we post-process the Top-N list by grouping items via a normalized title key and keeping only one representative per group.
+
 Future improvements could include:
 
 \begin{itemize}
