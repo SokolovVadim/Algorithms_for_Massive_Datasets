@@ -17,6 +17,11 @@
 
 \maketitle
 
+I declare that this material, which I now submit for assessment, is entirely my own work and has not been taken from the work of others, save and to the extent that such work has been cited and acknowledged within the text of my work. 
+I understand that plagiarism, collusion, and copying are grave and serious offences in the university and accept the penalties that would be imposed should I engage in plagiarism, collusion or copying. 
+This assignment, or any part of it, has not been previously submitted by me or any other person for assessment on this or any other course of study. 
+No generative AI tool has been used to write the code or the report content.
+
 \section{Introduction}
 
 This project implements a book recommendation system using large-scale user review data. The system is designed following techniques studied in the course of Algorithms for Massive Datasets. 
@@ -28,7 +33,7 @@ The system is implemented in Google Colab using PySpark and processes Amazon Boo
 
 \section{Dataset}
 
-We use the Amazon Books Reviews dataset available on Kaggle. 
+We use the Amazon Books Reviews dataset available on Kaggle, version 1 February 2026. 
 It contains user reviews and ratings for books.
 
 Each rating record contains:
@@ -128,6 +133,58 @@ The recommendation algorithm is implemented using distributed transformations th
 \end{itemize}
 
 Therefore, while Apache Spark hides the execution details, the implemented pipeline follows the MapReduce paradigm throughout the similarity computation and recommendation stages.
+
+\subsection{Scalability Analysis}
+
+The recommender system is designed to operate on large datasets using distributed data processing. 
+The scalability of the solution depends mostly on the computation of item similarities and the aggregation of user interactions.
+
+Let:
+\begin{itemize}
+\item $U$ be the number of users,
+\item $I$ the number of items,
+\item $R$ the number of ratings,
+\item $\bar{k}$ the average number of items rated per user.
+\end{itemize}
+
+The main computational cost comes from generating item pairs per user. 
+For a user who rated $k$ items, the number of generated pairs is:
+
+\[
+\mathcal{O}(k^2)
+\]
+
+Therefore, total complexity for pair generation is approximately:
+
+\[
+\mathcal{O}\left(\sum_{u} k_u^2\right)
+\]
+
+which can be approximated by:
+
+\[
+\mathcal{O}(U \cdot \bar{k}^2)
+\]
+
+To limit the worst case scenario from very active users, we cap the number of items considered per user, 50 in the experiments.
+It limits the pair generation and stabilizes runtime.
+
+After pair generation, aggregation and similarity computation are performed using distributed reduce operations. 
+These operations scale well with cluster size, because item pairs are processed independently by partitions.
+
+Prediction and recommendation steps scale approximately linearly with the number of ratings used for scoring:
+
+\[
+\mathcal{O}(R \cdot K)
+\]
+
+where $K$ is the number of neighbors per item.
+
+Overall, runtime grows approximately linearly with the number of ratings when average user activity remains limited.
+
+In practice, increasing dataset size mainly increases distributed aggregation workload, which Spark handles efficiently by distributing computation across nodes. 
+Therefore, the solution scales to larger datasets, if sufficient cluster resources are available.
+In experiments, runtime scaled approximately proportionally to the sampled dataset size, confirming expected behavior.
 
 \section{Evaluation}
 
