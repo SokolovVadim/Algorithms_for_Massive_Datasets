@@ -6,6 +6,12 @@ The report is placed in report/AMD_report.pdf
 
 The notebook is placed in notebooks/recommender.ipynb
 
+
+
+## Run in Google Colab
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/SokolovVadim/Algorithms_for_Massive_Datasets/blob/master/notebooks/recommender.ipynb)
+
 TODO: polish the README, now it just contains preliminary results and it's not a report.
 
 ## Book recommendation system
