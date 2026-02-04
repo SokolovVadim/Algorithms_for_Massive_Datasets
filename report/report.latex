@@ -46,7 +46,7 @@ Each rating record contains:
 \end{itemize}
 
 After cleaning invalid ratings and removing missing values, we randomly sample 20\% of the dataset for efficient experimentation. 
-First tries to sample less were leading to lower coverage, 20% sampling is optimal.
+First tries to sample less were leading to lower coverage, 20\% sampling is optimal.
 
 After filtering users and books with very few ratings, the resulting dataset contains:
 

@@ -2,6 +2,12 @@
 
 ### Algorithms for Massive Datasets Project
 
+The report is placed in report/AMD_report.pdf
+
+The notebook is placed in notebooks/recommender.ipynb
+
+TODO: polish the README, now it just contains preliminary results and it's not a report.
+
 ## Book recommendation system
 
 After filtering the data, making pairs with MIN_COMMON_USERS = 3:
@@ -247,9 +253,7 @@ what we seeing is a a real property of the dataset and a predictor :
 
 If only a few neighbor contributions exist, pull the prediction toward the user mean
 
-
 ## Significance weighting
-
 
 ### Before significance weighting
 
@@ -273,7 +277,6 @@ If only a few neighbor contributions exist, pull the prediction toward the user 
 * NDCG@10 ≈ **0.013**
 
 sim'=0.703 (shrink=0.714, common=25)
-
 
 Meaning:
 
