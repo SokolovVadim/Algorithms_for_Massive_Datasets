@@ -226,6 +226,27 @@ The improvements produced measurable gains over both the minimum version and a p
 
 These results confirm that similarity regularization and mean-centered predictions enhance both accuracy and recommendation usefulness.
 
+\subsection{Significance weighting parameter tuning}
+We evaluated the impact of significance weighting parameter $\beta$
+on recommendation quality.
+
+Increasing $\beta$ stabilizes similarity estimates by reducing the
+impact of item pairs with few common users. However, excessive
+shrinkage reduces neighborhood diversity.
+
+Experimental results show:
+
+\begin{itemize}
+\item RMSE is minimized at $\beta = 15$,
+\item Coverage is maximized at $\beta = 10$,
+\item NDCG@10 is maximized at $\beta = 10$.
+\end{itemize}
+
+Since recommendation systems aim to optimize ranking quality rather
+than exact rating prediction, we select $\beta = 10$ as the final
+configuration, providing the best trade-off between ranking quality
+and coverage.
+
 
 Future improvements could include:
 
