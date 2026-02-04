@@ -5,6 +5,7 @@
 \usepackage{hyperref}
 \usepackage{geometry}
 \usepackage{enumitem}
+\usepackage{graphicx}
 
 \geometry{margin=2.5cm}
 
@@ -46,6 +47,12 @@ After filtering users and books with very few ratings, the resulting dataset con
 \item 9,795 users
 \item 13,660 books
 \end{itemize}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{../images/rating_distribution.png}
+\caption{Rating distribution}
+\end{figure}
 
 \section{Method}
 
@@ -136,12 +143,12 @@ Evaluation metrics:
 Results:
 
 \begin{center}
-\begin{tabular}{lcc}
+\begin{tabular}{lrrrrrr}
 \toprule
-Method & RMSE & Coverage \\
+Model & RMSE & Coverage & Hit@10 & Precision@10 & Recall@10 & NDCG@10 \\
 \midrule
-Global mean baseline & 1.037 & 1.00 \\
-Item-item CF & 0.422 & 0.375 \\
+ItemKNN (centered + shrink) & 0.4075 & 0.3854 & 0.4048 & 0.0494 & 0.2791 & 0.1667 \\
+Popularity baseline & -- & -- & 0.0440 & 0.0048 & 0.0219 & 0.0117 \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -151,17 +158,6 @@ The collaborative filtering method significantly improves prediction accuracy co
 \subsection{Top-$K$ Recommendation Quality}
 
 To evaluate recommendation quality as a ranking problem, we compute Top-$10$ recommendations per user and measure HitRate@10, Precision@10, Recall@10 and NDCG@10 on held-out test items. Users with at least 3 training items and at least 1 test item are considered. Results are averaged over 1,935 users (a cap of 2,000 users was used for efficiency).
-
-\begin{center}
-\begin{tabular}{lcccc}
-\toprule
-Method & HitRatex10 & Precisionx10 & Recallx10 & NDCGx10 \\
-\midrule
-Popularity baseline & 0.0440 & 0.0048 & 0.0219 & 0.0117 \\
-Item-item CF & 0.3654 & 0.0447 & 0.2494 & 0.1464 \\
-\bottomrule
-\end{tabular}
-\end{center}
 
 \section{Example Recommendations}
 
@@ -224,9 +220,16 @@ The improvements produced measurable gains over both the minimum version and a p
 \item Ranking metrics significantly outperformed the popularity baseline.
 \end{itemize}
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{../images/model_baseline_comparison.png}
+\caption{Model and baseline comparison.}
+\end{figure}
+
 These results confirm that similarity regularization and mean-centered predictions enhance both accuracy and recommendation usefulness.
 
 \subsection{Significance weighting parameter tuning}
+
 We evaluated the impact of significance weighting parameter $\beta$
 on recommendation quality.
 
@@ -236,17 +239,29 @@ shrinkage reduces neighborhood diversity.
 
 Experimental results show:
 
-\begin{itemize}
-\item RMSE is minimized at $\beta = 15$,
-\item Coverage is maximized at $\beta = 10$,
-\item NDCG@10 is maximized at $\beta = 10$.
-\end{itemize}
+\begin{center}
+\begin{tabular}{lrrrrrrrr}
+\toprule
+Configuration & $\beta$ & RMSE & Coverage & Hit@10 & Precision@10 & Recall@10 & NDCG@10 \\
+\midrule
+Base & 0 & 0.4215 & 0.3747 & 0.3664 & 0.0447 & 0.2497 & 0.1465 \\
+$\beta=5$ & 5 & 0.4104 & 0.3854 & 0.3990 & 0.0490 & 0.2751 & 0.1589 \\
+$\beta=10$ & 10 & 0.4101 & 0.3881 & 0.4048 & 0.0494 & 0.2791 & 0.1667 \\
+$\beta=15$ & 15 & 0.4062 & 0.3854 & 0.4083 & 0.0503 & 0.2798 & 0.1629 \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 Since recommendation systems aim to optimize ranking quality rather
 than exact rating prediction, we select $\beta = 10$ as the final
 configuration, providing the best trade-off between ranking quality
 and coverage.
 
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.8\linewidth]{../images/ndcg_vs_beta.png}
+\caption{Effect of parameter $\beta$ on NDCG@10.}
+\end{figure}
 
 Future improvements could include:
 
