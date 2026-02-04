@@ -19,15 +19,17 @@
 
 \section{Introduction}
 
-This project implements a book recommendation system using large-scale user review data. The system is designed following techniques studied in the course, in particular collaborative filtering implemented on distributed data processing frameworks.
+This project implements a book recommendation system using large-scale user review data. The system is designed following techniques studied in the course of Algorithms for Massive Datasets. 
+In particular collaborative filtering implemented on distributed data processing frameworks.
 
-The goal is to recommend books to users based on past ratings while handling datasets that cannot be processed efficiently on a single machine without distributed techniques.
+The goal is to recommend books to users based on past ratings while handling large datasets that cannot be processed efficiently on a single machine without distributed algorithms.
 
 The system is implemented in Google Colab using PySpark and processes Amazon Books Reviews data from Kaggle.
 
 \section{Dataset}
 
-We use the \textit{Amazon Books Reviews} dataset available on Kaggle. It contains user reviews and ratings for books.
+We use the Amazon Books Reviews dataset available on Kaggle. 
+It contains user reviews and ratings for books.
 
 Each rating record contains:
 
@@ -38,7 +40,8 @@ Each rating record contains:
 \item book title
 \end{itemize}
 
-After cleaning invalid ratings and removing missing values, we randomly sample 20\% of the dataset for efficient experimentation.
+After cleaning invalid ratings and removing missing values, we randomly sample 20\% of the dataset for efficient experimentation. 
+First tries to sample less were leading to lower coverage, 20% sampling is optimal.
 
 After filtering users and books with very few ratings, the resulting dataset contains:
 
@@ -56,7 +59,7 @@ After filtering users and books with very few ratings, the resulting dataset con
 
 \section{Method}
 
-We implement an \textbf{item--item collaborative filtering} recommender system.
+We implemented an item--item collaborative filtering recommender system.
 
 The pipeline is:
 
@@ -75,6 +78,8 @@ sim(i,j) =
 \frac{\sum_u r_{ui} r_{uj}}
 {\sqrt{\sum_u r_{ui}^2} \sqrt{\sum_u r_{uj}^2}}
 \]
+
+Where $r_{i}$ is a book rating given by a user.
 
 Predicted rating for user $u$ on item $i$:
 
@@ -104,25 +109,25 @@ All processing steps are executed using Spark RDD transformations and aggregatio
 
 \subsection{Relation to MapReduce Processing}
 
-Although the implementation uses Apache Spark, the core computations follow the MapReduce processing model studied in the course.
+Although the implementation uses Apache Spark, the core computations follow the MapReduce processing protocol studied in the course.
 
 The recommendation algorithm is implemented using distributed transformations that correspond to Map and Reduce operations:
 
 \begin{itemize}
-\item \textbf{User aggregation:} ratings are mapped to $(user, (item, rating))$ pairs and grouped by user, corresponding to a Map followed by a Reduce-by-key operation.
+\item User aggregation: ratings are mapped to $(user, (item, rating))$ pairs and grouped by user, corresponding to a Map followed by a Reduce-by-key operation.
 
-\item \textbf{Item pair generation:} for each user, all combinations of rated items are generated using a flatMap transformation, producing intermediate key-value pairs representing item pairs.
+\item Item pair generation: for each user, all combinations of rated items are generated using a flatMap transformation, producing intermediate key-value pairs representing item pairs.
 
-\item \textbf{Pair statistics aggregation:} statistics required for cosine similarity are aggregated using reduceByKey, which corresponds to a distributed Reduce phase.
+\item Pair statistics aggregation: statistics required for cosine similarity are aggregated using reduceByKey, which corresponds to a distributed Reduce phase.
 
-\item \textbf{Similarity computation:} aggregated statistics are mapped to cosine similarity values for each item pair.
+\item Similarity computation: aggregated statistics are mapped to cosine similarity values for each item pair.
 
-\item \textbf{Neighborhood construction:} item similarities are regrouped by item and only the top-$K$ neighbors are kept, again using distributed grouping and reduction.
+\item Neighborhood construction: item similarities are regrouped by item and only the top-$K$ neighbors are kept, using distributed grouping and reduction.
 
-\item \textbf{Prediction and evaluation:} predicted ratings and evaluation metrics such as RMSE are computed via distributed map and aggregation operations.
+\item Prediction and evaluation: predicted ratings and evaluation metrics such as RMSE are computed via distributed map and aggregation operations.
 \end{itemize}
 
-Therefore, while Spark abstracts execution details, the implemented pipeline follows the MapReduce paradigm throughout the similarity computation and recommendation stages.
+Therefore, while Apache Spark hides the execution details, the implemented pipeline follows the MapReduce paradigm throughout the similarity computation and recommendation stages.
 
 \section{Evaluation}
 
@@ -137,17 +142,17 @@ Evaluation metrics:
 
 \begin{itemize}
 \item Root Mean Square Error (RMSE)
-\item Coverage (fraction of predictions produced)
+\item Coverage: fraction of predictions produced
 \end{itemize}
 
-Results:
+Results for the baseline and Item Item collaborative filtering:
 
 \begin{center}
 \begin{tabular}{lrrrrrr}
 \toprule
 Model & RMSE & Coverage & Hit@10 & Precision@10 & Recall@10 & NDCG@10 \\
 \midrule
-ItemKNN (centered + shrink) & 0.4075 & 0.3854 & 0.4048 & 0.0494 & 0.2791 & 0.1667 \\
+ItemKNN (centered, shrink) & 0.4075 & 0.3854 & 0.4048 & 0.0494 & 0.2791 & 0.1667 \\
 Popularity baseline & -- & -- & 0.0440 & 0.0048 & 0.0219 & 0.0117 \\
 \bottomrule
 \end{tabular}
@@ -157,38 +162,50 @@ The collaborative filtering method significantly improves prediction accuracy co
 
 \subsection{Top-$K$ Recommendation Quality}
 
-To evaluate recommendation quality as a ranking problem, we compute Top-$10$ recommendations per user and measure HitRate@10, Precision@10, Recall@10 and NDCG@10 on held-out test items. Users with at least 3 training items and at least 1 test item are considered. Results are averaged over 1,935 users (a cap of 2,000 users was used for efficiency).
+To evaluate recommendation quality as a ranking problem, we compute Top-$10$ recommendations per user and measure HitRate@10, Precision@10, Recall@10 and NDCG@10 on test items. 
+Users with at least 3 training items and at least 1 test item are considered. 
+Results are averaged over 1935 users, a cap of 2000 users was used for efficiency.
 
 \section{Example Recommendations}
 
-For active users, the system recommends books consistent with their preferences, for example classic literature readers receive recommendations for similar classic works.
+For active users, the system recommends books consistent with their preferences. 
+For example classic literature readers receive recommendations for similar classic books.
 
 The system also provides explanations based on similar books previously rated by the user.
 
 \section{Discussion}
 
-The dataset is strongly skewed toward 5-star ratings, making rating prediction less informative in some cases. However, ranking-based recommendations remain meaningful.
+The dataset is strongly biased toward 5-star ratings, making rating prediction less informative in some cases. 
+However, ranking-based recommendations remain meaningful.
 
 Coverage is limited by sparsity, since many books share few common reviewers.
 
-Also item canonicalization by title was tested; however, naive canonicalization may split/merge items incorrectly and reduces overlap, decreasing coverage.
-To avoid recommending multiple editions of the same book, we post-process the Top-N list by grouping items via a normalized title key and keeping only one representative per group.
+Also item canonicalization by title was tested. 
+However, naive canonicalization may split or merge items incorrectly and reduces overlap, decreasing coverage.
+To avoid recommending multiple editions of the same book, we post process the Top-N list by grouping items via a normalized title key and keeping only one representative per group.
 
 \subsection{Model Improvements}
 
-After implementing the baseline item-based collaborative filtering recommender, several improvements were introduced to enhance prediction quality and recommendation ranking.
+After implementing the baseline item-based collaborative filtering recommender, several improvements were made to enhance prediction quality and recommendation ranking.
 
 \paragraph{Significance-weighted similarities.}
-Cosine similarity between items may become unreliable when computed from only a few common users. To mitigate this effect, a significance weighting factor was introduced:
+
+Cosine similarity between items may become unreliable when computed it from only a few common users.
+To mitigate this effect, a significance weighting factor was introduced:
 
 \[
 sim'(i,j) = sim(i,j) \cdot \frac{n_{ij}}{n_{ij} + \beta},
 \]
 
-where $n_{ij}$ is the number of users who rated both items and $\beta$ is a smoothing parameter. This reduces the influence of item pairs supported by few users while preserving strong similarities backed by sufficient data.
+where $n_{ij}$ is the number of users who rated both items and $\beta$ is a smoothing parameter. 
+
+This reduces the influence of item pairs supported by few users while preserving strong similarities provided by sufficient data.
 
 \paragraph{Mean-centered predictions.}
-User rating behavior often differs in scale. Therefore, predictions are computed using mean-centered ratings:
+
+User rating behavior often differs in scale. 
+Some of the users tend to rate highly, the others were giving lower ratings. 
+Therefore, predictions are computed using mean-centered ratings:
 
 \[
 \hat r_{u,i} = \mu_u +
@@ -196,9 +213,12 @@ User rating behavior often differs in scale. Therefore, predictions are computed
      {\sum_{j \in I_u} |sim'(i,j)|},
 \]
 
-where $\mu_u$ is the mean rating of user $u$. This correction improves personalization and reduces bias caused by overly generous or strict raters.
+where $\mu_u$ is the mean rating of user $u$. 
+
+This correction improves personalization and reduces bias caused by overly generous or strict raters.
 
 \paragraph{Recommendation evaluation metrics.}
+
 Beyond prediction RMSE, ranking quality was evaluated using Top-$N$ recommendation metrics:
 
 \begin{itemize}
@@ -227,6 +247,7 @@ The improvements produced measurable gains over both the minimum version and a p
 \end{figure}
 
 These results confirm that similarity regularization and mean-centered predictions enhance both accuracy and recommendation usefulness.
+The most important metric here is ranking, and it was improved strongly, though the rest of the metrics did not chanhe much.
 
 \subsection{Significance weighting parameter tuning}
 
@@ -274,17 +295,19 @@ Future improvements could include:
 
 \section{Conclusion}
 
-In this project, a recommender system for books was implemented from scratch using distributed data processing techniques. The system relies on an item-based collaborative filtering approach, where item similarities are computed using cosine similarity over user ratings.
+In this project, a recommender system for books was implemented from scratch using distributed data processing techniques. 
+The system relies on an item-based collaborative filtering approach, where item similarities are computed using cosine similarity over user ratings.
 
-The implementation follows a distributed MapReduce-style pipeline using Apache Spark, allowing the processing of large-scale rating data. Several improvements were introduced beyond a basic recommender, including similarity significance weighting, mean-centered predictions, duplicate title handling, and ranking-based evaluation metrics.
+The implementation follows a distributed MapReduce style pipeline using Apache Spark, allowing the processing of large-scale rating data. 
+Several improvements were introduced beyond a basic recommender, including similarity significance weighting, mean-centered predictions, duplicate title handling, and ranking-based evaluation metrics.
 
-Experimental results show that the proposed system significantly outperforms a simple popularity-based baseline, both in prediction accuracy and ranking quality. In particular, improvements in RMSE, recommendation coverage, and Top-$N$ ranking metrics demonstrate the effectiveness of similarity regularization and user-centered predictions.
+Experimental results show that the proposed system significantly outperforms a simple popularity-based baseline, both in prediction accuracy and ranking quality. 
+In particular, improvements in RMSE, recommendation coverage, and Top-$N$ ranking metrics demonstrate the effectiveness of similarity regularization and user-centered predictions.
 
 The project illustrates how classical recommendation algorithms can be efficiently implemented in distributed environments and highlights the importance of proper evaluation when dealing with large-scale datasets.
 
 Future improvements could include hybrid models combining collaborative and content-based methods, as well as more advanced matrix factorization or embedding techniques.
 
-Overall, the project successfully demonstrates practical application of algorithms and technologies studied in the course for solving real-world large-scale data processing problems.
-
+Overall, the project demonstrates practical application of algorithms and technologies studied in the course for solving real-world large-scale data processing problems.
 
 \end{document}
